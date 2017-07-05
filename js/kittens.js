@@ -120,7 +120,7 @@ class Engine {
 
         var enemySpot;
         // Keep looping until we find a free enemy spot at random
-        while (!enemySpot || this.enemies[enemySpot]) {
+        while (!enemySpot && this.enemies[enemySpot]) { //M: this line checks to make sure that there is a spot on the game width with no enemy in it
             enemySpot = Math.floor(Math.random() * enemySpots);
         }
 
