@@ -19,7 +19,7 @@ var MOVE_RIGHT = 'right';
 
 // Preload game images
 var images = {};
-['enemy.png', 'stars.png', 'player.png'].forEach(imgName => {
+['enemy.png', 'stars.png', 'player.png', 'tomato.png'].forEach(imgName => {
     var img = document.createElement('img');
     img.src = 'images/' + imgName;
     images[imgName] = img;
@@ -52,6 +52,12 @@ class Enemy extends Entity {
     }
 
    
+}
+
+class Tomato extends Enemy {
+    super() {
+        
+    }
 }
 
 class Player extends Entity {
@@ -185,9 +191,9 @@ class Engine {
         // Check if player is dead
         if (this.isPlayerDead()) {
             // If they are dead, then it's game over!
-            this.ctx.font = 'bold 30px Impact';
-            this.ctx.fillStyle = '#ffffff';
-            this.ctx.fillText(this.score + ' GAME OVER', 5, 200);
+            this.ctx.font = 'bold 23px Arial';
+            this.ctx.fillStyle = '#9602f2';
+            this.ctx.fillText(this.score + ' SHE CAN HAZ VEGBURGER', 5, 200);
         }
         else {
             // If player is not dead, then draw the score
