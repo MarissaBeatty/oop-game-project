@@ -6,8 +6,12 @@ var ENEMY_WIDTH = 75;
 var ENEMY_HEIGHT = 156;
 var MAX_ENEMIES = 3;
 
+var TOMATO_WIDTH = 75;
+var TOMATO_HEIGHT = 78;
+var MAX_TOMATOES = 1;
+
 var PLAYER_WIDTH = 75;
-var PLAYER_HEIGHT = 54;
+var PLAYER_HEIGHT = 67;
 
 // These two constants keep us from using "magic numbers" in our code
 var LEFT_ARROW_CODE = 37;
@@ -19,14 +23,25 @@ var MOVE_RIGHT = 'right';
 
 // Preload game images
 var images = {};
-['enemy.png', 'stars.png', 'player.png', 'tomato.png'].forEach(imgName => {
+['enemy.png', 'rainbow.png', 'player.png', 'tomato.png'].forEach(imgName => {
     var img = document.createElement('img');
     img.src = 'images/' + imgName;
     images[imgName] = img;
 });
 
+//soundtrack
+var audio = document.createElement("audio");
+audio.src = "audio/puppysong.mp3";
+audio.play();
+audio.loop = true;
 
+//isPlayerDead audio
+var deadAudio = document.createElement("audio");
+deadAudio.src = "audio/doh.mp3";
 
+//tomato points audio
+var pointsAudio = document.createElement("audio");
+pointsAudio.src = "audio/eat.wav";
 
 
 // This section is where you will be doing most of your coding
@@ -50,14 +65,16 @@ class Enemy extends Entity {
     update(timeDiff) {
         this.y = this.y + timeDiff * this.speed;
     }
-
-   
 }
 
-class Tomato extends Enemy {
-    super() {
-        
+class Tomato extends Entity {
+    constructor(xPos) {
+        super();
+        this.x = xPos;
+        this.y = GAME_HEIGHT - TOMATO_HEIGHT - 10;
+        this.sprite = images['tomato.png'];
     }
+    
 }
 
 class Player extends Entity {
@@ -95,6 +112,9 @@ class Engine {
 
         // Setup enemies, making sure there are always three
         this.setupEnemies();
+        
+        // set up tomatoes
+        this.setupTomatoes();
 
         // Setup the <canvas> element where we will be drawing
         var canvas = document.createElement('canvas');
@@ -135,6 +155,30 @@ class Engine {
 
         this.enemies[enemySpot] = new Enemy(enemySpot * ENEMY_WIDTH);
     }
+    
+    //setup tomatoes 
+     setupTomatoes() {
+        if (!this.tomatoes) {
+            this.tomatoes = [];
+        }
+
+        while (this.tomatoes.filter(e => !!e).length < MAX_TOMATOES) {
+            this.addTomato();
+        }
+    }
+
+    // This method finds a random spot where there is no tomato, and puts one in there
+    addTomato() {
+        var tomatoSpots = GAME_WIDTH / TOMATO_WIDTH;
+
+        var tomatoSpot;
+      // Keep looping until we find a free spot at random
+        while (!tomatoSpot && this.tomatoes[tomatoSpot]) {  
+            tomatoSpot = Math.floor(Math.random() * tomatoSpots);
+        }
+        
+        this.tomatoes[tomatoSpot] = new Tomato(tomatoSpot * TOMATO_WIDTH);
+    }
 
     // This method kicks off the game
     start() {
@@ -174,10 +218,11 @@ class Engine {
 
         // Call update on all enemies
         this.enemies.forEach(enemy => enemy.update(timeDiff));
-
+        
         // Draw everything!
-        this.ctx.drawImage(images['stars.png'], 0, 0); // draw the star bg
+        this.ctx.drawImage(images['rainbow.png'], 0, 0); // draw the star bg
         this.enemies.forEach(enemy => enemy.render(this.ctx)); // draw the enemies
+        this.tomatoes.forEach(tomato => tomato.render(this.ctx)); // draw tomatoes
         this.player.render(this.ctx); // draw the player
 
         // Check if any enemies should die
@@ -187,13 +232,27 @@ class Engine {
             }
         });
         this.setupEnemies();
-
-        // Check if player is dead
+        
+        //are tomatoes being eaten?
+        this.tomatoes.forEach((tomato, tomatoIdx) => {
+            if (tomato.x === this.player.x) {
+                delete this.tomatoes[tomatoIdx];
+                this.lastFrame = Date.now();
+                requestAnimationFrame(this.gameLoop);
+                pointsAudio.play();
+                this.score = this.score + 1000; 
+            }
+        });
+        this.setupTomatoes();
+    
+         // Check if player is dead
         if (this.isPlayerDead()) {
             // If they are dead, then it's game over!
-            this.ctx.font = 'bold 23px Arial';
+            this.ctx.font = 'bold 20px Arial';
             this.ctx.fillStyle = '#9602f2';
             this.ctx.fillText(this.score + ' SHE CAN HAZ VEGBURGER', 5, 200);
+            audio.pause();
+            deadAudio.play();
         }
         else {
             // If player is not dead, then draw the score
@@ -221,14 +280,9 @@ class Engine {
                 
             
         } return false;
-        
-
-        
     }
+
 }
-
-
-
 
 
 // This section will start the game
