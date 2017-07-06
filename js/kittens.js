@@ -74,7 +74,6 @@ class Player {
 
 
 
-
 /*
 This section is a tiny game engine.
 This engine will use your Enemy and Player classes to create the behavior of the game.
@@ -119,10 +118,11 @@ class Engine {
         var enemySpots = GAME_WIDTH / ENEMY_WIDTH;
 
         var enemySpot;
-        // Keep looping until we find a free enemy spot at random
-        while (!enemySpot && this.enemies[enemySpot]) { //M: this line checks to make sure that there is a spot on the game width with no enemy in it
+       // Keep looping until we find a free enemy spot at random
+        while (!enemySpot && this.enemies[enemySpot]) { //M: change from || (or) to && (and); "this.enemies[enemySpot]" refers to 1 of 5 slots on the screen, and !enemySpot checks that it's currently not occupied by an enemy. Need for both to be true to properly find a slot. Before it was only  
             enemySpot = Math.floor(Math.random() * enemySpots);
         }
+        
 
         this.enemies[enemySpot] = new Enemy(enemySpot * ENEMY_WIDTH);
     }
@@ -184,7 +184,7 @@ class Engine {
             // If they are dead, then it's game over!
             this.ctx.font = 'bold 30px Impact';
             this.ctx.fillStyle = '#ffffff';
-            this.ctx.fillText(this.score + ' GAME OVER', 5, 30);
+            this.ctx.fillText(this.score + ' GAME OVER', 5, 200);
         }
         else {
             // If player is not dead, then draw the score
@@ -199,8 +199,22 @@ class Engine {
     }
 
     isPlayerDead() {
-        // TODO: fix this function!
-        return false;
+       // TODO: fix this function!
+       // loop through enemies 
+        
+        for(var i = 0; i < this.enemies.length; i++) {
+            //check if any have same position as player
+             if(this.enemies[i] //is there an enemy in the game
+             &&this.enemies[i].x === this.player.x //are they on the same horizontal position
+             && this.enemies[i].y + ENEMY_HEIGHT/2 > this.player.y) { //is the enemy halfway over the player on the y axis
+                     return true; //is dead because enemy has same position as player
+                 } 
+                
+            
+        } return false;
+        
+
+        
     }
 }
 
